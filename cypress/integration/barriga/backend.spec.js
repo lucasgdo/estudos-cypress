@@ -44,7 +44,7 @@ describe('Should test at a functional level', () => {
         }).then(res => {
             cy.request({
                 method: 'PUT',
-                url: 'https://barrigareact.wcaquino.me/contas/40938',
+                url: `/contas/${res.body[0].id}`,
                 headers: { Authorization: `JWT ${token}` },
                 body: { nome: 'Conta alterada via rest' }
             }).as('response');
@@ -55,9 +55,38 @@ describe('Should test at a functional level', () => {
     });
 
     it('Should not create an account with same name', () => {
+        cy.request({
+            method: 'POST',
+            url: '/contas',
+            headers: { Authorization: `JWT ${token}` },
+            body: { nome: 'Conta mesmo nome' },
+            failOnStatusCode: false
+        }).as('response');
+        
+        cy.get('@response')
+            .then(res => {
+                console.log(res);
+                expect(res.status).to.be.equal(400);
+                expect(res.body).to.have.property('error', 'Já existe uma conta com esse nome!');
+        });
     });
 
-    it('Should create a transaction', () => {
+    it.only('Should create a transaction', () => {
+        cy.request({
+            method: 'POST',
+            url: '/transacoes',
+            headers: { Authorization: `JWT ${token}` },
+            body: {
+                conta_id: "41058",
+                data_pagamento: "12/11/2019",
+                data_transacao: "12/11/2019",
+                descricao: "desc",
+                envolvido: "inter",
+                status: true,
+                tipo: "REC",
+                valor: "123"
+            }
+        });
     });
 
     it('Should get balance', () => {
