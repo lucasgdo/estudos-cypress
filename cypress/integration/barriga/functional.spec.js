@@ -38,10 +38,10 @@ describe('Should test at a functional level', () => {
         cy.get(loc.CONTAS.NOME).type('Conta mesmo nome');
         cy.get(loc.CONTAS.BTN_SALVAR).click();
         cy.get(loc.MESSAGE).should('contain', 'code 400');
+        cy.get('.toast-error > .toast-close-button').click();
     });
 
     it('Should create a transaction', () => {
-        cy.get('.toast-error > .toast-close-button').click();
         cy.get(loc.MENU.MOVIMENTACAO).click();
 
         cy.get(loc.MOVIMENTACAO.DESCRICAO).type('Desc');

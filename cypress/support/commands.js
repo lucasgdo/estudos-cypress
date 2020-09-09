@@ -38,7 +38,7 @@ Cypress.Commands.add('login', (user, passwd) => {
     cy.get(loc.LOGIN.USER).type(user);
     cy.get(loc.LOGIN.PASSWORD).type(passwd);
     cy.get(loc.LOGIN.BTN_LOGIN).click();
-    cy.get(loc.MESSAGE).should('contain', 'Bem vindo, Lucas Gomes!');
+    cy.get(loc.MESSAGE).should('contain', 'Bem vindo');
 });
 
 Cypress.Commands.add('resetApp', () => {
@@ -58,6 +58,7 @@ Cypress.Commands.add('getToken', (user, passwd) => {
     }).its('body.token')
         .should('not.be.empty')
         .then(token => {
+            Cypress.env('token', token);
             return token
         });
 });
@@ -70,4 +71,29 @@ Cypress.Commands.add('resetRest', () => {
             headers: { Authorization: `JWT ${token}` }
         }).its('status').should('be.equal', 200);
     });
+});
+
+Cypress.Commands.add('getContaByName', name => {
+    cy.getToken('lucas-teste@email.com', '123456').then(token => {
+        cy.request({
+            method: 'GET',
+            url: '/contas',
+            headers: { Authorization: `JWT ${token}` },
+            qs: {
+                nome: name
+            }
+        }).then(res => res.body[0].id);
+    });
+});
+
+Cypress.Commands.overwrite('request', (originalFn, ...options) => {
+    if(options.length === 1) {
+        if(Cypress.env('token')) {
+            options[0]. headers = {
+                Authorization: `JWT ${Cypress.env('token')}`
+            }
+        };
+    };
+
+    return originalFn(...options)
 });
